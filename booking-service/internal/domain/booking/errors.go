@@ -9,4 +9,5 @@ var (
 	ErrOverlappingBooking      = errors.New("booking overlaps with existing booking")
 	ErrInvalidTimeRange        = errors.New("invalid time range")
 	ErrPastBooking             = errors.New("cannot book in the past")
+	ErrInvalidInput            = errors.New("invalid input")
 )

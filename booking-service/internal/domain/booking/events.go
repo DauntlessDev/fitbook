@@ -7,6 +7,10 @@ type Event interface {
 	OccurredAt() time.Time
 }
 
+type EventPublisher interface {
+	Publish(event Event) error
+}
+
 type BaseBookingEvent struct {
 	BookingID      string
 	UserID         string
@@ -51,4 +55,29 @@ type BookingCompletedEvent struct {
 
 func (e BookingCompletedEvent) EventName() string {
 	return "booking.completed"
+}
+
+func NewBookingEvent(booking *Booking, eventType string) Event {
+	baseEvent := BaseBookingEvent{
+		BookingID:      booking.ID,
+		UserID:         booking.UserID,
+		GymID:          booking.GymID,
+		StartTime:      booking.StartTime,
+		EndTime:        booking.EndTime,
+		Status:         booking.Status,
+		OccurredAtTime: time.Now(),
+	}
+
+	switch eventType {
+	case "created":
+		return BookingCreatedEvent{BaseBookingEvent: baseEvent}
+	case "cancelled":
+		return BookingCancelledEvent{BaseBookingEvent: baseEvent}
+	case "confirmed":
+		return BookingConfirmedEvent{BaseBookingEvent: baseEvent}
+	case "completed":
+		return BookingCompletedEvent{BaseBookingEvent: baseEvent}
+	default:
+		return nil
+	}
 }
