@@ -18,13 +18,6 @@ func NewService(repo Repository, publisher EventPublisher) *Service {
 }
 
 func (s *Service) CreateBooking(ctx context.Context, userID, gymID string, startTime, endTime time.Time) (*Booking, error) {
-	if userID == "" || gymID == "" {
-		return nil, ErrInvalidInput
-	}
-	if startTime.IsZero() || endTime.IsZero() {
-		return nil, ErrInvalidInput
-	}
-
 	booking, err := NewBooking(userID, gymID, startTime, endTime)
 	if err != nil {
 		return nil, err
@@ -56,10 +49,6 @@ func (s *Service) CreateBooking(ctx context.Context, userID, gymID string, start
 }
 
 func (s *Service) CancelBooking(ctx context.Context, bookingID string) error {
-	if bookingID == "" {
-		return ErrInvalidInput
-	}
-
 	booking, err := s.repo.GetByID(ctx, bookingID)
 	if err != nil {
 		return err
@@ -78,10 +67,6 @@ func (s *Service) CancelBooking(ctx context.Context, bookingID string) error {
 }
 
 func (s *Service) ConfirmBooking(ctx context.Context, bookingID string) error {
-	if bookingID == "" {
-		return ErrInvalidInput
-	}
-
 	booking, err := s.repo.GetByID(ctx, bookingID)
 	if err != nil {
 		return err
@@ -100,10 +85,6 @@ func (s *Service) ConfirmBooking(ctx context.Context, bookingID string) error {
 }
 
 func (s *Service) CompleteBooking(ctx context.Context, bookingID string) error {
-	if bookingID == "" {
-		return ErrInvalidInput
-	}
-
 	booking, err := s.repo.GetByID(ctx, bookingID)
 	if err != nil {
 		return err
@@ -122,22 +103,13 @@ func (s *Service) CompleteBooking(ctx context.Context, bookingID string) error {
 }
 
 func (s *Service) GetBooking(ctx context.Context, bookingID string) (*Booking, error) {
-	if bookingID == "" {
-		return nil, ErrInvalidInput
-	}
 	return s.repo.GetByID(ctx, bookingID)
 }
 
 func (s *Service) ListUserBookings(ctx context.Context, userID string, startTime, endTime time.Time) ([]*Booking, error) {
-	if userID == "" || startTime.IsZero() || endTime.IsZero() {
-		return nil, ErrInvalidInput
-	}
 	return s.repo.ListByUserID(ctx, userID, startTime, endTime)
 }
 
 func (s *Service) ListGymBookings(ctx context.Context, gymID string, startTime, endTime time.Time) ([]*Booking, error) {
-	if gymID == "" || startTime.IsZero() || endTime.IsZero() {
-		return nil, ErrInvalidInput
-	}
 	return s.repo.ListByGymID(ctx, gymID, startTime, endTime)
 }
