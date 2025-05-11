@@ -15,9 +15,18 @@ type Booking struct {
 	UpdatedAt time.Time
 }
 
-func NewBooking(userID, gymID string, startTime, endTime time.Time) *Booking {
+func NewBooking(userID, gymID string, startTime, endTime time.Time) (*Booking, error) {
 	now := time.Now()
-	return &Booking{
+
+	if startTime.Before(now) {
+		return nil, ErrPastBooking
+	}
+
+	if !startTime.Before(endTime) {
+		return nil, ErrInvalidTimeRange
+	}
+
+	booking := &Booking{
 		UserID:    userID,
 		GymID:     gymID,
 		StartTime: startTime,
@@ -26,6 +35,8 @@ func NewBooking(userID, gymID string, startTime, endTime time.Time) *Booking {
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
+
+	return booking, nil
 }
 
 func (b *Booking) Cancel() error {
@@ -53,4 +64,10 @@ func (b *Booking) Complete() error {
 	b.Status = StatusCompleted
 	b.UpdatedAt = time.Now()
 	return nil
+}
+
+func (b *Booking) OverlapsWith(other *Booking) bool {
+	return b.GymID == other.GymID &&
+		b.StartTime.Before(other.EndTime) &&
+		b.EndTime.After(other.StartTime)
 }
