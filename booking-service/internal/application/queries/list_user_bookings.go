@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/yourusername/fitbook/booking-service/internal/application/dtos"
 	"github.com/yourusername/fitbook/booking-service/internal/application/validator"
 	"github.com/yourusername/fitbook/booking-service/internal/domain/booking"
 )
@@ -15,7 +16,7 @@ type ListUserBookingsQuery struct {
 }
 
 type ListUserBookingsResult struct {
-	Bookings []*booking.Booking
+	Bookings []*dtos.BookingDTO
 }
 
 type ListUserBookingsHandler struct {
@@ -41,7 +42,12 @@ func (h *ListUserBookingsHandler) Handle(ctx context.Context, query ListUserBook
 		return nil, err
 	}
 
+	bookingDTOs := make([]*dtos.BookingDTO, len(bookings))
+	for i, b := range bookings {
+		bookingDTOs[i] = dtos.FromDomain(b)
+	}
+
 	return &ListUserBookingsResult{
-		Bookings: bookings,
+		Bookings: bookingDTOs,
 	}, nil
 }

@@ -3,6 +3,7 @@ package queries
 import (
 	"context"
 
+	"github.com/yourusername/fitbook/booking-service/internal/application/dtos"
 	"github.com/yourusername/fitbook/booking-service/internal/application/validator"
 	"github.com/yourusername/fitbook/booking-service/internal/domain/booking"
 )
@@ -12,7 +13,7 @@ type GetBookingQuery struct {
 }
 
 type GetBookingResult struct {
-	Booking *booking.Booking
+	Booking *dtos.BookingDTO
 }
 
 type GetBookingHandler struct {
@@ -36,6 +37,6 @@ func (h *GetBookingHandler) Handle(ctx context.Context, query GetBookingQuery) (
 	}
 
 	return &GetBookingResult{
-		Booking: booking,
+		Booking: dtos.FromDomain(booking),
 	}, nil
 }

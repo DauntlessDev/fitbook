@@ -2,17 +2,18 @@ package commands
 
 import (
 	"context"
-	"time"
 
+	"github.com/yourusername/fitbook/booking-service/internal/application/dtos"
 	"github.com/yourusername/fitbook/booking-service/internal/application/validator"
 	"github.com/yourusername/fitbook/booking-service/internal/domain/booking"
 )
 
 type CreateBookingCommand struct {
-	UserID    string    `json:"user_id" validate:"required"`
-	GymID     string    `json:"gym_id" validate:"required"`
-	StartTime time.Time `json:"start_time" validate:"required"`
-	EndTime   time.Time `json:"end_time" validate:"required"`
+	DTO *dtos.CreateBookingDTO
+}
+
+type CreateBookingResult struct {
+	Booking *dtos.BookingDTO
 }
 
 type CreateBookingHandler struct {
@@ -25,23 +26,36 @@ func NewCreateBookingHandler(bookingService *booking.Service) *CreateBookingHand
 	}
 }
 
-func (h *CreateBookingHandler) Handle(ctx context.Context, cmd CreateBookingCommand) error {
-	if err := validator.ValidateUserID(cmd.UserID); err != nil {
-		return err
+func (h *CreateBookingHandler) Handle(ctx context.Context, cmd CreateBookingCommand) (*CreateBookingResult, error) {
+	if err := validator.ValidateUserID(cmd.DTO.UserID); err != nil {
+		return nil, err
 	}
-	if err := validator.ValidateGymID(cmd.GymID); err != nil {
-		return err
-	}
-	if err := validator.ValidateTimeRange(cmd.StartTime, cmd.EndTime); err != nil {
-		return err
+	if err := validator.ValidateGymID(cmd.DTO.GymID); err != nil {
+		return nil, err
 	}
 
-	_, err := h.bookingService.CreateBooking(
+	// Convert DTO times to domain times
+	userID, gymID, startTime, endTime, err := cmd.DTO.ToDomain()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := validator.ValidateTimeRange(startTime, endTime); err != nil {
+		return nil, err
+	}
+
+	booking, err := h.bookingService.CreateBooking(
 		ctx,
-		cmd.UserID,
-		cmd.GymID,
-		cmd.StartTime,
-		cmd.EndTime,
+		userID,
+		gymID,
+		startTime,
+		endTime,
 	)
-	return err
+	if err != nil {
+		return nil, err
+	}
+
+	return &CreateBookingResult{
+		Booking: dtos.FromDomain(booking),
+	}, nil
 }
