@@ -20,12 +20,12 @@ type ListGymBookingsResult struct {
 }
 
 type ListGymBookingsHandler struct {
-	bookingService *booking.Service
+	domainService *booking.Service
 }
 
-func NewListGymBookingsHandler(bookingService *booking.Service) *ListGymBookingsHandler {
+func NewListGymBookingsHandler(domainService *booking.Service) *ListGymBookingsHandler {
 	return &ListGymBookingsHandler{
-		bookingService: bookingService,
+		domainService: domainService,
 	}
 }
 
@@ -37,14 +37,14 @@ func (h *ListGymBookingsHandler) Handle(ctx context.Context, query ListGymBookin
 		return nil, err
 	}
 
-	bookings, err := h.bookingService.ListGymBookings(ctx, query.GymID, query.StartTime, query.EndTime)
+	bookings, err := h.domainService.ListGymBookings(ctx, query.GymID, query.StartTime, query.EndTime)
 	if err != nil {
 		return nil, err
 	}
 
 	bookingDTOs := make([]*dtos.BookingDTO, len(bookings))
-	for i, b := range bookings {
-		bookingDTOs[i] = dtos.FromDomain(b)
+	for i, bookingRecord := range bookings {
+		bookingDTOs[i] = dtos.FromDomain(bookingRecord)
 	}
 
 	return &ListGymBookingsResult{

@@ -17,12 +17,14 @@ type CreateBookingResult struct {
 }
 
 type CreateBookingHandler struct {
-	bookingService *booking.Service
+	domainService *booking.Service
+	publisher     booking.EventPublisher
 }
 
-func NewCreateBookingHandler(bookingService *booking.Service) *CreateBookingHandler {
+func NewCreateBookingHandler(domainService *booking.Service, publisher booking.EventPublisher) *CreateBookingHandler {
 	return &CreateBookingHandler{
-		bookingService: bookingService,
+		domainService: domainService,
+		publisher:     publisher,
 	}
 }
 
@@ -44,7 +46,7 @@ func (h *CreateBookingHandler) Handle(ctx context.Context, cmd CreateBookingComm
 		return nil, err
 	}
 
-	booking, err := h.bookingService.CreateBooking(
+	bookingRecord, err := h.domainService.CreateBooking(
 		ctx,
 		userID,
 		gymID,
@@ -55,7 +57,14 @@ func (h *CreateBookingHandler) Handle(ctx context.Context, cmd CreateBookingComm
 		return nil, err
 	}
 
+	// Publish event
+	event := booking.NewBookingEvent(bookingRecord, "created")
+	if err := h.publisher.Publish(event); err != nil {
+		// TODO: Consider implementing event publishing retry mechanism
+		return nil, err
+	}
+
 	return &CreateBookingResult{
-		Booking: dtos.FromDomain(booking),
+		Booking: dtos.FromDomain(bookingRecord),
 	}, nil
 }

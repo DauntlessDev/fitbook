@@ -12,12 +12,14 @@ type CompleteBookingCommand struct {
 }
 
 type CompleteBookingHandler struct {
-	bookingService *booking.Service
+	domainService *booking.Service
+	publisher     booking.EventPublisher
 }
 
-func NewCompleteBookingHandler(bookingService *booking.Service) *CompleteBookingHandler {
+func NewCompleteBookingHandler(domainService *booking.Service, publisher booking.EventPublisher) *CompleteBookingHandler {
 	return &CompleteBookingHandler{
-		bookingService: bookingService,
+		domainService: domainService,
+		publisher:     publisher,
 	}
 }
 
@@ -26,5 +28,15 @@ func (h *CompleteBookingHandler) Handle(ctx context.Context, cmd CompleteBooking
 		return err
 	}
 
-	return h.bookingService.CompleteBooking(ctx, cmd.BookingID)
+	if err := h.domainService.CompleteBooking(ctx, cmd.BookingID); err != nil {
+		return err
+	}
+
+	bookingRecord, err := h.domainService.GetBooking(ctx, cmd.BookingID)
+	if err != nil {
+		return err
+	}
+
+	event := booking.NewBookingEvent(bookingRecord, "completed")
+	return h.publisher.Publish(event)
 }

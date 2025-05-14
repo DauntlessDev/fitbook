@@ -20,12 +20,12 @@ type ListUserBookingsResult struct {
 }
 
 type ListUserBookingsHandler struct {
-	bookingService *booking.Service
+	domainService *booking.Service
 }
 
-func NewListUserBookingsHandler(bookingService *booking.Service) *ListUserBookingsHandler {
+func NewListUserBookingsHandler(domainService *booking.Service) *ListUserBookingsHandler {
 	return &ListUserBookingsHandler{
-		bookingService: bookingService,
+		domainService: domainService,
 	}
 }
 
@@ -37,14 +37,14 @@ func (h *ListUserBookingsHandler) Handle(ctx context.Context, query ListUserBook
 		return nil, err
 	}
 
-	bookings, err := h.bookingService.ListUserBookings(ctx, query.UserID, query.StartTime, query.EndTime)
+	bookings, err := h.domainService.ListUserBookings(ctx, query.UserID, query.StartTime, query.EndTime)
 	if err != nil {
 		return nil, err
 	}
 
 	bookingDTOs := make([]*dtos.BookingDTO, len(bookings))
-	for i, b := range bookings {
-		bookingDTOs[i] = dtos.FromDomain(b)
+	for i, bookingRecord := range bookings {
+		bookingDTOs[i] = dtos.FromDomain(bookingRecord)
 	}
 
 	return &ListUserBookingsResult{

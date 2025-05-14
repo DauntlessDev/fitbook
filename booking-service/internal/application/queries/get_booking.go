@@ -17,12 +17,12 @@ type GetBookingResult struct {
 }
 
 type GetBookingHandler struct {
-	bookingService *booking.Service
+	domainService *booking.Service
 }
 
-func NewGetBookingHandler(bookingService *booking.Service) *GetBookingHandler {
+func NewGetBookingHandler(domainService *booking.Service) *GetBookingHandler {
 	return &GetBookingHandler{
-		bookingService: bookingService,
+		domainService: domainService,
 	}
 }
 
@@ -31,12 +31,12 @@ func (h *GetBookingHandler) Handle(ctx context.Context, query GetBookingQuery) (
 		return nil, err
 	}
 
-	booking, err := h.bookingService.GetBooking(ctx, query.BookingID)
+	bookingRecord, err := h.domainService.GetBooking(ctx, query.BookingID)
 	if err != nil {
 		return nil, err
 	}
 
 	return &GetBookingResult{
-		Booking: dtos.FromDomain(booking),
+		Booking: dtos.FromDomain(bookingRecord),
 	}, nil
 }
