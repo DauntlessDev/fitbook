@@ -17,47 +17,47 @@ type CreateBookingResult struct {
 }
 
 type CreateBookingHandler struct {
-	domainService *booking.Service
-	publisher     booking.EventPublisher
+	repo      booking.Repository
+	publisher booking.EventPublisher
 }
 
-func NewCreateBookingHandler(domainService *booking.Service, publisher booking.EventPublisher) *CreateBookingHandler {
+func NewCreateBookingHandler(repo booking.Repository, publisher booking.EventPublisher) *CreateBookingHandler {
 	return &CreateBookingHandler{
-		domainService: domainService,
-		publisher:     publisher,
+		repo:      repo,
+		publisher: publisher,
 	}
 }
 
 func (h *CreateBookingHandler) Handle(ctx context.Context, cmd CreateBookingCommand) (*CreateBookingResult, error) {
-	if err := validator.ValidateUserID(cmd.DTO.UserID); err != nil {
-		return nil, err
-	}
-	if err := validator.ValidateGymID(cmd.DTO.GymID); err != nil {
+	if err := validator.ValidateCreateBookingDTO(cmd.DTO); err != nil {
 		return nil, err
 	}
 
-	// Convert DTO times to domain times
 	userID, gymID, startTime, endTime, err := cmd.DTO.ToDomain()
 	if err != nil {
 		return nil, err
 	}
 
-	if err := validator.ValidateTimeRange(startTime, endTime); err != nil {
-		return nil, err
-	}
-
-	bookingRecord, err := h.domainService.CreateBooking(
-		ctx,
-		userID,
-		gymID,
-		startTime,
-		endTime,
-	)
+	bookingRecord, err := booking.NewBooking(userID, gymID, startTime, endTime)
 	if err != nil {
 		return nil, err
 	}
 
-	// Publish event
+	existingBookings, err := h.repo.ListByGymID(ctx, gymID, startTime, endTime)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, existing := range existingBookings {
+		if bookingRecord.OverlapsWith(existing) {
+			return nil, booking.ErrOverlappingBooking
+		}
+	}
+
+	if err := h.repo.Create(ctx, bookingRecord); err != nil {
+		return nil, err
+	}
+
 	event := booking.NewBookingEvent(bookingRecord, "created")
 	if err := h.publisher.Publish(event); err != nil {
 		// TODO: Consider implementing event publishing retry mechanism

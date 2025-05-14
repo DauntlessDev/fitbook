@@ -15,8 +15,7 @@ import (
 func TestCreateBookingHandler(t *testing.T) {
 	repo := mocks.NewMockRepository()
 	publisher := mocks.NewMockEventPublisher()
-	service := booking.NewService(repo)
-	handler := commands.NewCreateBookingHandler(service, publisher)
+	handler := commands.NewCreateBookingHandler(repo, publisher)
 
 	now := time.Now().Truncate(time.Second) // Truncate to seconds for consistent comparison
 	validDTO := &dtos.CreateBookingDTO{

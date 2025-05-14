@@ -12,14 +12,14 @@ type CancelBookingCommand struct {
 }
 
 type CancelBookingHandler struct {
-	domainService *booking.Service
-	publisher     booking.EventPublisher
+	repo      booking.Repository
+	publisher booking.EventPublisher
 }
 
-func NewCancelBookingHandler(domainService *booking.Service, publisher booking.EventPublisher) *CancelBookingHandler {
+func NewCancelBookingHandler(repo booking.Repository, publisher booking.EventPublisher) *CancelBookingHandler {
 	return &CancelBookingHandler{
-		domainService: domainService,
-		publisher:     publisher,
+		repo:      repo,
+		publisher: publisher,
 	}
 }
 
@@ -28,12 +28,16 @@ func (h *CancelBookingHandler) Handle(ctx context.Context, cmd CancelBookingComm
 		return err
 	}
 
-	if err := h.domainService.CancelBooking(ctx, cmd.BookingID); err != nil {
+	bookingRecord, err := h.repo.GetByID(ctx, cmd.BookingID)
+	if err != nil {
 		return err
 	}
 
-	bookingRecord, err := h.domainService.GetBooking(ctx, cmd.BookingID)
-	if err != nil {
+	if err := bookingRecord.Cancel(); err != nil {
+		return err
+	}
+
+	if err := h.repo.Update(ctx, bookingRecord); err != nil {
 		return err
 	}
 

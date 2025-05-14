@@ -12,14 +12,14 @@ type ConfirmBookingCommand struct {
 }
 
 type ConfirmBookingHandler struct {
-	domainService *booking.Service
-	publisher     booking.EventPublisher
+	repo      booking.Repository
+	publisher booking.EventPublisher
 }
 
-func NewConfirmBookingHandler(domainService *booking.Service, publisher booking.EventPublisher) *ConfirmBookingHandler {
+func NewConfirmBookingHandler(repo booking.Repository, publisher booking.EventPublisher) *ConfirmBookingHandler {
 	return &ConfirmBookingHandler{
-		domainService: domainService,
-		publisher:     publisher,
+		repo:      repo,
+		publisher: publisher,
 	}
 }
 
@@ -28,12 +28,16 @@ func (h *ConfirmBookingHandler) Handle(ctx context.Context, cmd ConfirmBookingCo
 		return err
 	}
 
-	if err := h.domainService.ConfirmBooking(ctx, cmd.BookingID); err != nil {
+	bookingRecord, err := h.repo.GetByID(ctx, cmd.BookingID)
+	if err != nil {
 		return err
 	}
 
-	bookingRecord, err := h.domainService.GetBooking(ctx, cmd.BookingID)
-	if err != nil {
+	if err := bookingRecord.Confirm(); err != nil {
+		return err
+	}
+
+	if err := h.repo.Update(ctx, bookingRecord); err != nil {
 		return err
 	}
 
