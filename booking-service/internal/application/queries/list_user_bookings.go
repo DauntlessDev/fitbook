@@ -20,12 +20,12 @@ type ListUserBookingsResult struct {
 }
 
 type ListUserBookingsHandler struct {
-	domainService *booking.Service
+	repo booking.Repository
 }
 
-func NewListUserBookingsHandler(domainService *booking.Service) *ListUserBookingsHandler {
+func NewListUserBookingsHandler(repo booking.Repository) *ListUserBookingsHandler {
 	return &ListUserBookingsHandler{
-		domainService: domainService,
+		repo: repo,
 	}
 }
 
@@ -37,7 +37,7 @@ func (h *ListUserBookingsHandler) Handle(ctx context.Context, query ListUserBook
 		return nil, err
 	}
 
-	bookings, err := h.domainService.ListUserBookings(ctx, query.UserID, query.StartTime, query.EndTime)
+	bookings, err := h.repo.ListByUserID(ctx, query.UserID, query.StartTime, query.EndTime)
 	if err != nil {
 		return nil, err
 	}

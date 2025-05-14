@@ -13,8 +13,7 @@ import (
 
 func TestGetBookingHandler(t *testing.T) {
 	repo := mocks.NewMockRepository()
-	service := booking.NewService(repo)
-	handler := queries.NewGetBookingHandler(service)
+	handler := queries.NewGetBookingHandler(repo)
 
 	// Create a test booking
 	now := time.Now().Truncate(time.Second) // Truncate to seconds

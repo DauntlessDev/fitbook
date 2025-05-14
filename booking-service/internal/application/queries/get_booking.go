@@ -17,12 +17,12 @@ type GetBookingResult struct {
 }
 
 type GetBookingHandler struct {
-	domainService *booking.Service
+	repo booking.Repository
 }
 
-func NewGetBookingHandler(domainService *booking.Service) *GetBookingHandler {
+func NewGetBookingHandler(repo booking.Repository) *GetBookingHandler {
 	return &GetBookingHandler{
-		domainService: domainService,
+		repo: repo,
 	}
 }
 
@@ -31,7 +31,7 @@ func (h *GetBookingHandler) Handle(ctx context.Context, query GetBookingQuery) (
 		return nil, err
 	}
 
-	bookingRecord, err := h.domainService.GetBooking(ctx, query.BookingID)
+	bookingRecord, err := h.repo.GetByID(ctx, query.BookingID)
 	if err != nil {
 		return nil, err
 	}
