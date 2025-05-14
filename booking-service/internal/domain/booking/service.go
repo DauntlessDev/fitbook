@@ -6,14 +6,12 @@ import (
 )
 
 type Service struct {
-	repo      Repository
-	publisher EventPublisher
+	repo Repository
 }
 
-func NewService(repo Repository, publisher EventPublisher) *Service {
+func NewService(repo Repository) *Service {
 	return &Service{
-		repo:      repo,
-		publisher: publisher,
+		repo: repo,
 	}
 }
 
@@ -38,13 +36,6 @@ func (s *Service) CreateBooking(ctx context.Context, userID, gymID string, start
 		return nil, err
 	}
 
-	event := NewBookingEvent(booking, "created")
-	if err := s.publisher.Publish(event); err != nil {
-		// TODO: Consider implementing event publishing retry mechanism
-		// For now, we'll just log the error
-		return nil, err
-	}
-
 	return booking, nil
 }
 
@@ -58,12 +49,7 @@ func (s *Service) CancelBooking(ctx context.Context, bookingID string) error {
 		return err
 	}
 
-	if err := s.repo.Update(ctx, booking); err != nil {
-		return err
-	}
-
-	event := NewBookingEvent(booking, "cancelled")
-	return s.publisher.Publish(event)
+	return s.repo.Update(ctx, booking)
 }
 
 func (s *Service) ConfirmBooking(ctx context.Context, bookingID string) error {
@@ -76,12 +62,7 @@ func (s *Service) ConfirmBooking(ctx context.Context, bookingID string) error {
 		return err
 	}
 
-	if err := s.repo.Update(ctx, booking); err != nil {
-		return err
-	}
-
-	event := NewBookingEvent(booking, "confirmed")
-	return s.publisher.Publish(event)
+	return s.repo.Update(ctx, booking)
 }
 
 func (s *Service) CompleteBooking(ctx context.Context, bookingID string) error {
@@ -94,12 +75,7 @@ func (s *Service) CompleteBooking(ctx context.Context, bookingID string) error {
 		return err
 	}
 
-	if err := s.repo.Update(ctx, booking); err != nil {
-		return err
-	}
-
-	event := NewBookingEvent(booking, "completed")
-	return s.publisher.Publish(event)
+	return s.repo.Update(ctx, booking)
 }
 
 func (s *Service) GetBooking(ctx context.Context, bookingID string) (*Booking, error) {
