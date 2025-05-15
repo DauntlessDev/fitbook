@@ -43,19 +43,19 @@ func TestNewBooking(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range tests {
-		t.Run(testCase.name, func(t *testing.T) {
-			newBooking, err := booking.NewBooking(testCase.userID, testCase.gymID, testCase.startTime, testCase.endTime)
-			if testCase.wantErr {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			newBooking, err := booking.NewBooking(test.userID, test.gymID, test.startTime, test.endTime)
+			if test.wantErr {
 				assert.Error(t, err)
 				assert.Nil(t, newBooking)
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, newBooking)
-				assert.Equal(t, testCase.userID, newBooking.UserID)
-				assert.Equal(t, testCase.gymID, newBooking.GymID)
-				assert.Equal(t, testCase.startTime, newBooking.StartTime)
-				assert.Equal(t, testCase.endTime, newBooking.EndTime)
+				assert.Equal(t, test.userID, newBooking.UserID)
+				assert.Equal(t, test.gymID, newBooking.GymID)
+				assert.Equal(t, test.startTime, newBooking.StartTime)
+				assert.Equal(t, test.endTime, newBooking.EndTime)
 				assert.Equal(t, booking.StatusPending, newBooking.Status)
 			}
 		})
@@ -145,11 +145,11 @@ func TestBookingOverlap(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range tests {
-		t.Run(testCase.name, func(t *testing.T) {
-			comparisonBooking, err := booking.NewBooking("user1", "gym1", testCase.startTime, testCase.endTime)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			comparisonBooking, err := booking.NewBooking("user1", "gym1", test.startTime, test.endTime)
 			assert.NoError(t, err)
-			assert.Equal(t, testCase.wantOverlap, baseBooking.OverlapsWith(comparisonBooking))
+			assert.Equal(t, test.wantOverlap, baseBooking.OverlapsWith(comparisonBooking))
 		})
 	}
 }
