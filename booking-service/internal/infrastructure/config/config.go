@@ -141,10 +141,10 @@ func mustGetEnv(key string) (string, error) {
 	return "", fmt.Errorf("environment variable %s is required but not set", key)
 }
 
-func (c *DatabaseConfig) GetDSN() string {
-	return c.URL
+func (config *DatabaseConfig) GetDSN() string {
+	return config.URL
 }
 
-func (c *RedisConfig) GetRedisAddr() string {
-	return c.URL
+func (config *RedisConfig) GetRedisAddr() string {
+	return config.URL
 }

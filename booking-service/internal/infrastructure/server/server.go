@@ -46,12 +46,12 @@ func Start(cfg *config.Config) error {
 	)
 	healthHandler := handlers.NewHealthHandler()
 
-	r := router.NewRouter(bookingHandler, healthHandler)
+	newRouter := router.NewRouter(bookingHandler, healthHandler)
 	log.Println("Router initialized")
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
-		Handler:      r,
+		Handler:      newRouter,
 		ReadTimeout:  cfg.Server.ReadTimeout,
 		WriteTimeout: cfg.Server.WriteTimeout,
 	}

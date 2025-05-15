@@ -18,13 +18,13 @@ func NewBookingEventPublisher(logger *log.Logger) *BookingEventPublisher {
 	}
 }
 
-func (p *BookingEventPublisher) Publish(event booking.Event) error {
+func (publisher *BookingEventPublisher) Publish(event booking.Event) error {
 	data, err := json.Marshal(event)
 	if err != nil {
 		return fmt.Errorf("failed to marshal event: %w", err)
 	}
 
-	p.logger.Printf("Publishing event: %s, data: %s", event.EventName(), string(data))
+	publisher.logger.Printf("Publishing event: %s, data: %s", event.EventName(), string(data))
 
 	// TODO: Implement actual event publishing logic
 	// For now, we'll just log the event

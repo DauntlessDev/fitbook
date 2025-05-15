@@ -14,7 +14,7 @@ func NewEventPublisher() *EventPublisher {
 	return &EventPublisher{}
 }
 
-func (p *EventPublisher) Publish(event booking.Event) error {
+func (publisher *EventPublisher) Publish(event booking.Event) error {
 	// TODO: Implement proper event publishing
 	log.Printf("Event published: %s", event.EventName())
 	return nil

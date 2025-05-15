@@ -23,33 +23,33 @@ func NewRouter(
 	bookingHandler *handlers.BookingHandler,
 	healthHandler *handlers.HealthHandler,
 ) *Router {
-	r := &Router{
+	router := &Router{
 		mux:            http.NewServeMux(),
 		bookingHandler: bookingHandler,
 		healthHandler:  healthHandler,
 	}
-	r.setupRoutes()
-	return r
+	router.setupRoutes()
+	return router
 }
 
-func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	r.mux.ServeHTTP(w, req)
+func (router *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	router.mux.ServeHTTP(w, req)
 }
 
-func (r *Router) setupRoutes() {
-	r.mux.Handle("/v1/", http.StripPrefix("/v1", r.mux))
+func (router *Router) setupRoutes() {
+	router.mux.Handle("/v1/", http.StripPrefix("/v1", router.mux))
 
 	// Health check endpoint
-	r.mux.HandleFunc("GET /health", r.withLogging(r.healthHandler.Check))
+	router.mux.HandleFunc("GET /health", router.withLogging(router.healthHandler.Check))
 
 	// Booking endpoints
-	r.mux.HandleFunc("POST /bookings", r.withLogging(r.bookingHandler.CreateBooking))
-	r.mux.HandleFunc("GET /bookings", r.withLogging(r.bookingHandler.ListBookings))
-	r.mux.HandleFunc("GET /bookings/{id}", r.withLogging(r.bookingHandler.GetBooking))
-	r.mux.HandleFunc("DELETE /bookings/{id}", r.withLogging(r.bookingHandler.CancelBooking))
+	router.mux.HandleFunc("POST /bookings", router.withLogging(router.bookingHandler.CreateBooking))
+	router.mux.HandleFunc("GET /bookings", router.withLogging(router.bookingHandler.ListBookings))
+	router.mux.HandleFunc("GET /bookings/{id}", router.withLogging(router.bookingHandler.GetBooking))
+	router.mux.HandleFunc("DELETE /bookings/{id}", router.withLogging(router.bookingHandler.CancelBooking))
 }
 
-func (r *Router) withLogging(next http.HandlerFunc) http.HandlerFunc {
+func (router *Router) withLogging(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		start := time.Now()
 		next(w, req)
