@@ -43,20 +43,20 @@ func TestNewBooking(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			b, err := booking.NewBooking(tt.userID, tt.gymID, tt.startTime, tt.endTime)
-			if tt.wantErr {
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			newBooking, err := booking.NewBooking(testCase.userID, testCase.gymID, testCase.startTime, testCase.endTime)
+			if testCase.wantErr {
 				assert.Error(t, err)
-				assert.Nil(t, b)
+				assert.Nil(t, newBooking)
 			} else {
 				assert.NoError(t, err)
-				assert.NotNil(t, b)
-				assert.Equal(t, tt.userID, b.UserID)
-				assert.Equal(t, tt.gymID, b.GymID)
-				assert.Equal(t, tt.startTime, b.StartTime)
-				assert.Equal(t, tt.endTime, b.EndTime)
-				assert.Equal(t, booking.StatusPending, b.Status)
+				assert.NotNil(t, newBooking)
+				assert.Equal(t, testCase.userID, newBooking.UserID)
+				assert.Equal(t, testCase.gymID, newBooking.GymID)
+				assert.Equal(t, testCase.startTime, newBooking.StartTime)
+				assert.Equal(t, testCase.endTime, newBooking.EndTime)
+				assert.Equal(t, booking.StatusPending, newBooking.Status)
 			}
 		})
 	}
@@ -64,47 +64,47 @@ func TestNewBooking(t *testing.T) {
 
 func TestBookingStatusTransitions(t *testing.T) {
 	now := time.Now()
-	b, err := booking.NewBooking("user1", "gym1", now.Add(time.Hour), now.Add(2*time.Hour))
+	testBooking, err := booking.NewBooking("user1", "gym1", now.Add(time.Hour), now.Add(2*time.Hour))
 	assert.NoError(t, err)
 
 	t.Run("valid status transitions", func(t *testing.T) {
 		// Pending -> Confirmed
-		err := b.Confirm()
+		err := testBooking.Confirm()
 		assert.NoError(t, err)
-		assert.Equal(t, booking.StatusConfirmed, b.Status)
+		assert.Equal(t, booking.StatusConfirmed, testBooking.Status)
 
 		// Confirmed -> Completed
-		err = b.Complete()
+		err = testBooking.Complete()
 		assert.NoError(t, err)
-		assert.Equal(t, booking.StatusCompleted, b.Status)
+		assert.Equal(t, booking.StatusCompleted, testBooking.Status)
 	})
 
 	t.Run("invalid status transitions", func(t *testing.T) {
 		// Completed -> Confirmed (invalid)
-		err := b.Confirm()
+		err := testBooking.Confirm()
 		assert.Error(t, err)
-		assert.Equal(t, booking.StatusCompleted, b.Status)
+		assert.Equal(t, booking.StatusCompleted, testBooking.Status)
 	})
 
 	t.Run("cancellation", func(t *testing.T) {
-		b, err := booking.NewBooking("user1", "gym1", now.Add(time.Hour), now.Add(2*time.Hour))
+		cancellationTestBooking, err := booking.NewBooking("user1", "gym1", now.Add(time.Hour), now.Add(2*time.Hour))
 		assert.NoError(t, err)
 
 		// Cancel from Pending
-		err = b.Cancel()
+		err = cancellationTestBooking.Cancel()
 		assert.NoError(t, err)
-		assert.Equal(t, booking.StatusCancelled, b.Status)
+		assert.Equal(t, booking.StatusCancelled, cancellationTestBooking.Status)
 
 		// Try to cancel again
-		err = b.Cancel()
+		err = cancellationTestBooking.Cancel()
 		assert.Error(t, err)
-		assert.Equal(t, booking.StatusCancelled, b.Status)
+		assert.Equal(t, booking.StatusCancelled, cancellationTestBooking.Status)
 	})
 }
 
 func TestBookingOverlap(t *testing.T) {
 	now := time.Now()
-	b1, err := booking.NewBooking("user1", "gym1", now.Add(time.Hour), now.Add(2*time.Hour))
+	baseBooking, err := booking.NewBooking("user1", "gym1", now.Add(time.Hour), now.Add(2*time.Hour))
 	assert.NoError(t, err)
 
 	tests := []struct {
@@ -145,11 +145,11 @@ func TestBookingOverlap(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			b2, err := booking.NewBooking("user1", "gym1", tt.startTime, tt.endTime)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			comparisonBooking, err := booking.NewBooking("user1", "gym1", testCase.startTime, testCase.endTime)
 			assert.NoError(t, err)
-			assert.Equal(t, tt.wantOverlap, b1.OverlapsWith(b2))
+			assert.Equal(t, testCase.wantOverlap, baseBooking.OverlapsWith(comparisonBooking))
 		})
 	}
 }

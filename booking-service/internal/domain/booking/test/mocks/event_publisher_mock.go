@@ -17,31 +17,36 @@ func NewMockEventPublisher() *MockEventPublisher {
 	}
 }
 
-func (m *MockEventPublisher) Publish(event booking.Event) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	m.events = append(m.events, event)
+func (publisher *MockEventPublisher) Publish(event booking.Event) error {
+	publisher.mu.Lock()
+	defer publisher.mu.Unlock()
+
+	publisher.events = append(publisher.events, event)
+
 	return nil
 }
 
-// Helper methods for testing
-func (m *MockEventPublisher) GetEvents() []booking.Event {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-	return m.events
+func (publisher *MockEventPublisher) GetEvents() []booking.Event {
+	publisher.mu.RLock()
+	defer publisher.mu.RUnlock()
+
+	return publisher.events
 }
 
-func (m *MockEventPublisher) Clear() {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	m.events = make([]booking.Event, 0)
+func (publisher *MockEventPublisher) Clear() {
+	publisher.mu.Lock()
+	defer publisher.mu.Unlock()
+
+	publisher.events = make([]booking.Event, 0)
 }
 
-func (m *MockEventPublisher) GetLastEvent() booking.Event {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-	if len(m.events) == 0 {
+func (publisher *MockEventPublisher) GetLastEvent() booking.Event {
+	publisher.mu.RLock()
+	defer publisher.mu.RUnlock()
+
+	if len(publisher.events) == 0 {
 		return nil
 	}
-	return m.events[len(m.events)-1]
+
+	return publisher.events[len(publisher.events)-1]
 }
