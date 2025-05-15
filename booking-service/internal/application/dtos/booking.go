@@ -8,6 +8,12 @@ import (
 	"github.com/yourusername/fitbook/booking-service/internal/domain/booking"
 )
 
+type Response struct {
+	Success bool        `json:"success"`
+	Data    interface{} `json:"data,omitempty"`
+	Error   *ErrorDTO   `json:"error,omitempty"`
+}
+
 type BookingDTO struct {
 	ID        string `json:"id"`
 	UserID    string `json:"user_id"`
