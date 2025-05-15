@@ -2,7 +2,9 @@ package commands
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/yourusername/fitbook/booking-service/internal/application/dtos"
 	"github.com/yourusername/fitbook/booking-service/internal/application/validator"
 	"github.com/yourusername/fitbook/booking-service/internal/domain/booking"
@@ -38,33 +40,37 @@ func (h *CreateBookingHandler) Handle(ctx context.Context, cmd CreateBookingComm
 		return nil, err
 	}
 
-	bookingRecord, err := booking.NewBooking(userID, gymID, startTime, endTime)
-	if err != nil {
-		return nil, err
-	}
-
 	existingBookings, err := h.repo.ListByGymID(ctx, gymID, startTime, endTime)
 	if err != nil {
 		return nil, err
 	}
 
+	newBooking, err := booking.NewBooking(userID, gymID, startTime, endTime)
+	if err != nil {
+		return nil, err
+	}
+
+	newBooking.ID = uuid.New().String()
+
 	for _, existing := range existingBookings {
-		if bookingRecord.OverlapsWith(existing) {
+		if newBooking.OverlapsWith(existing) {
 			return nil, booking.ErrOverlappingBooking
 		}
 	}
 
-	if err := h.repo.Create(ctx, bookingRecord); err != nil {
+	fmt.Printf("new booking: %+v\n", newBooking)
+
+	if err := h.repo.Create(ctx, newBooking); err != nil {
 		return nil, err
 	}
 
-	event := booking.NewBookingEvent(bookingRecord, "created")
+	event := booking.NewBookingEvent(newBooking, "created")
 	if err := h.publisher.Publish(event); err != nil {
-		// TODO: Consider implementing event publishing retry mechanism
-		return nil, err
+		// Log the error but don't fail the request
+		// TODO: Add proper logging
 	}
 
 	return &CreateBookingResult{
-		Booking: dtos.FromDomain(bookingRecord),
+		Booking: dtos.FromDomain(newBooking),
 	}, nil
 }
