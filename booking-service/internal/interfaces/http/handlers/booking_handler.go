@@ -11,10 +11,12 @@ import (
 )
 
 type BookingHandler struct {
-	createHandler *commands.CreateBookingHandler
-	getHandler    *queries.GetBookingHandler
-	listHandler   *queries.ListBookingsHandler
-	cancelHandler *commands.CancelBookingHandler
+	createHandler   *commands.CreateBookingHandler
+	getHandler      *queries.GetBookingHandler
+	listHandler     *queries.ListBookingsHandler
+	cancelHandler   *commands.CancelBookingHandler
+	confirmHandler  *commands.ConfirmBookingHandler
+	completeHandler *commands.CompleteBookingHandler
 }
 
 func NewBookingHandler(
@@ -22,12 +24,16 @@ func NewBookingHandler(
 	getHandler *queries.GetBookingHandler,
 	listHandler *queries.ListBookingsHandler,
 	cancelHandler *commands.CancelBookingHandler,
+	confirmHandler *commands.ConfirmBookingHandler,
+	completeHandler *commands.CompleteBookingHandler,
 ) *BookingHandler {
 	return &BookingHandler{
-		createHandler: createHandler,
-		getHandler:    getHandler,
-		listHandler:   listHandler,
-		cancelHandler: cancelHandler,
+		createHandler:   createHandler,
+		getHandler:      getHandler,
+		listHandler:     listHandler,
+		cancelHandler:   cancelHandler,
+		confirmHandler:  confirmHandler,
+		completeHandler: completeHandler,
 	}
 }
 
@@ -61,6 +67,38 @@ func (handler *BookingHandler) GetBooking(w http.ResponseWriter, r *http.Request
 	}
 
 	writeJSON(w, http.StatusOK, result.Booking)
+}
+
+func (handler *BookingHandler) ConfirmBooking(w http.ResponseWriter, r *http.Request) {
+	bookingID := r.PathValue("id")
+	if bookingID == "" {
+		writeBadRequest(w, "Booking ID is required")
+		return
+	}
+
+	err := handler.confirmHandler.Handle(r.Context(), commands.ConfirmBookingCommand{BookingID: bookingID})
+	if err != nil {
+		handleBookingError(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, nil)
+}
+
+func (handler *BookingHandler) CompleteBooking(w http.ResponseWriter, r *http.Request) {
+	bookingID := r.PathValue("id")
+	if bookingID == "" {
+		writeBadRequest(w, "Booking ID is required")
+		return
+	}
+
+	err := handler.completeHandler.Handle(r.Context(), commands.CompleteBookingCommand{BookingID: bookingID})
+	if err != nil {
+		handleBookingError(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, nil)
 }
 
 func (handler *BookingHandler) ListBookings(w http.ResponseWriter, r *http.Request) {
