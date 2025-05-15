@@ -34,6 +34,8 @@ func Start(cfg *config.Config) error {
 
 	createBookingHandler := commands.NewCreateBookingHandler(bookingRepo, eventPublisher)
 	cancelBookingHandler := commands.NewCancelBookingHandler(bookingRepo, eventPublisher)
+	confirmBookingHandler := commands.NewConfirmBookingHandler(bookingRepo, eventPublisher)
+	completeBookingHandler := commands.NewCompleteBookingHandler(bookingRepo, eventPublisher)
 
 	getBookingHandler := queries.NewGetBookingHandler(bookingRepo)
 	listBookingsHandler := queries.NewListBookingsHandler(bookingRepo)
@@ -43,6 +45,8 @@ func Start(cfg *config.Config) error {
 		getBookingHandler,
 		listBookingsHandler,
 		cancelBookingHandler,
+		confirmBookingHandler,
+		completeBookingHandler,
 	)
 	healthHandler := handlers.NewHealthHandler()
 

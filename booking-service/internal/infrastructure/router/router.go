@@ -47,6 +47,8 @@ func (router *Router) setupRoutes() {
 	router.mux.HandleFunc("GET /bookings", router.withLogging(router.bookingHandler.ListBookings))
 	router.mux.HandleFunc("GET /bookings/{id}", router.withLogging(router.bookingHandler.GetBooking))
 	router.mux.HandleFunc("DELETE /bookings/{id}", router.withLogging(router.bookingHandler.CancelBooking))
+	router.mux.HandleFunc("PATCH /bookings/{id}/confirm", router.withLogging(router.bookingHandler.ConfirmBooking))
+	router.mux.HandleFunc("PATCH /bookings/{id}/complete", router.withLogging(router.bookingHandler.CompleteBooking))
 }
 
 func (router *Router) withLogging(next http.HandlerFunc) http.HandlerFunc {
