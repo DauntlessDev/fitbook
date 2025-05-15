@@ -31,14 +31,14 @@ func NewBookingHandler(
 	}
 }
 
-func (h *BookingHandler) CreateBooking(w http.ResponseWriter, r *http.Request) {
+func (handler *BookingHandler) CreateBooking(w http.ResponseWriter, r *http.Request) {
 	var dto dtos.CreateBookingDTO
 	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
 		writeBadRequest(w, "Invalid request body", err.Error())
 		return
 	}
 
-	result, err := h.createHandler.Handle(r.Context(), commands.CreateBookingCommand{DTO: &dto})
+	result, err := handler.createHandler.Handle(r.Context(), commands.CreateBookingCommand{DTO: &dto})
 	if err != nil {
 		handleBookingError(w, err)
 		return
@@ -47,14 +47,14 @@ func (h *BookingHandler) CreateBooking(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, result.Booking)
 }
 
-func (h *BookingHandler) GetBooking(w http.ResponseWriter, r *http.Request) {
+func (handler *BookingHandler) GetBooking(w http.ResponseWriter, r *http.Request) {
 	bookingID := r.PathValue("id")
 	if bookingID == "" {
 		writeBadRequest(w, "Booking ID is required")
 		return
 	}
 
-	result, err := h.getHandler.Handle(r.Context(), queries.GetBookingQuery{BookingID: bookingID})
+	result, err := handler.getHandler.Handle(r.Context(), queries.GetBookingQuery{BookingID: bookingID})
 	if err != nil {
 		handleBookingError(w, err)
 		return
@@ -63,7 +63,7 @@ func (h *BookingHandler) GetBooking(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, result.Booking)
 }
 
-func (h *BookingHandler) ListBookings(w http.ResponseWriter, r *http.Request) {
+func (handler *BookingHandler) ListBookings(w http.ResponseWriter, r *http.Request) {
 	var dto dtos.CreateBookingDTO
 	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
 		writeBadRequest(w, "Invalid request body")
@@ -87,7 +87,7 @@ func (h *BookingHandler) ListBookings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.listHandler.Handle(r.Context(), queries.ListBookingsQuery{
+	result, err := handler.listHandler.Handle(r.Context(), queries.ListBookingsQuery{
 		UserID:    dto.UserID,
 		GymID:     dto.GymID,
 		StartTime: startTime,
@@ -102,14 +102,14 @@ func (h *BookingHandler) ListBookings(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, result.Bookings)
 }
 
-func (h *BookingHandler) CancelBooking(w http.ResponseWriter, r *http.Request) {
+func (handler *BookingHandler) CancelBooking(w http.ResponseWriter, r *http.Request) {
 	bookingID := r.PathValue("id")
 	if bookingID == "" {
 		writeBadRequest(w, "Booking ID is required")
 		return
 	}
 
-	err := h.cancelHandler.Handle(r.Context(), commands.CancelBookingCommand{BookingID: bookingID})
+	err := handler.cancelHandler.Handle(r.Context(), commands.CancelBookingCommand{BookingID: bookingID})
 	if err != nil {
 		handleBookingError(w, err)
 		return
