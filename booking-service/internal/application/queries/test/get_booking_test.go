@@ -15,12 +15,10 @@ func TestGetBookingHandler(t *testing.T) {
 	repo := mocks.NewMockRepository()
 	handler := queries.NewGetBookingHandler(repo)
 
-	// Create a test booking
 	now := time.Now().Truncate(time.Second) // Truncate to seconds
 	testBooking, err := booking.NewBooking("user1", "gym1", now.Add(time.Hour), now.Add(2*time.Hour))
 	assert.NoError(t, err)
 
-	// Set a specific ID for testing
 	testBooking.ID = "test-booking-1"
 	repo.AddBooking(testBooking)
 
@@ -49,18 +47,18 @@ func TestGetBookingHandler(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
 			query := queries.GetBookingQuery{
-				BookingID: tt.bookingID,
+				BookingID: test.bookingID,
 			}
 
 			result, err := handler.Handle(context.Background(), query)
-			if tt.wantErr {
+			if test.wantErr {
 				assert.Error(t, err)
 				assert.Nil(t, result)
-				if tt.errType != nil {
-					assert.ErrorIs(t, err, tt.errType)
+				if test.errType != nil {
+					assert.ErrorIs(t, err, test.errType)
 				}
 			} else {
 				assert.NoError(t, err)

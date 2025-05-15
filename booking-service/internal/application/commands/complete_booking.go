@@ -23,12 +23,12 @@ func NewCompleteBookingHandler(repo booking.Repository, publisher booking.EventP
 	}
 }
 
-func (h *CompleteBookingHandler) Handle(ctx context.Context, cmd CompleteBookingCommand) error {
+func (handler *CompleteBookingHandler) Handle(ctx context.Context, cmd CompleteBookingCommand) error {
 	if err := validator.ValidateBookingID(cmd.BookingID); err != nil {
 		return err
 	}
 
-	bookingRecord, err := h.repo.GetByID(ctx, cmd.BookingID)
+	bookingRecord, err := handler.repo.GetByID(ctx, cmd.BookingID)
 	if err != nil {
 		return err
 	}
@@ -37,10 +37,10 @@ func (h *CompleteBookingHandler) Handle(ctx context.Context, cmd CompleteBooking
 		return err
 	}
 
-	if err := h.repo.Update(ctx, bookingRecord); err != nil {
+	if err := handler.repo.Update(ctx, bookingRecord); err != nil {
 		return err
 	}
 
 	event := booking.NewBookingEvent(bookingRecord, "completed")
-	return h.publisher.Publish(event)
+	return handler.publisher.Publish(event)
 }

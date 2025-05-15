@@ -30,7 +30,7 @@ func NewCreateBookingHandler(repo booking.Repository, publisher booking.EventPub
 	}
 }
 
-func (h *CreateBookingHandler) Handle(ctx context.Context, cmd CreateBookingCommand) (*CreateBookingResult, error) {
+func (handler *CreateBookingHandler) Handle(ctx context.Context, cmd CreateBookingCommand) (*CreateBookingResult, error) {
 	if err := validator.ValidateCreateBookingDTO(cmd.DTO); err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (h *CreateBookingHandler) Handle(ctx context.Context, cmd CreateBookingComm
 		return nil, err
 	}
 
-	existingBookings, err := h.repo.ListByGymID(ctx, gymID, startTime, endTime)
+	existingBookings, err := handler.repo.ListByGymID(ctx, gymID, startTime, endTime)
 	if err != nil {
 		return nil, err
 	}
@@ -60,12 +60,12 @@ func (h *CreateBookingHandler) Handle(ctx context.Context, cmd CreateBookingComm
 
 	fmt.Printf("new booking: %+v\n", newBooking)
 
-	if err := h.repo.Create(ctx, newBooking); err != nil {
+	if err := handler.repo.Create(ctx, newBooking); err != nil {
 		return nil, err
 	}
 
 	event := booking.NewBookingEvent(newBooking, "created")
-	if err := h.publisher.Publish(event); err != nil {
+	if err := handler.publisher.Publish(event); err != nil {
 		// Log the error but don't fail the request
 		// TODO: Add proper logging
 	}

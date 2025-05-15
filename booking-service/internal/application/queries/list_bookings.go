@@ -30,7 +30,7 @@ func NewListBookingsHandler(repo booking.Repository) *ListBookingsHandler {
 	}
 }
 
-func (h *ListBookingsHandler) Handle(ctx context.Context, query ListBookingsQuery) (*ListBookingsResult, error) {
+func (handler *ListBookingsHandler) Handle(ctx context.Context, query ListBookingsQuery) (*ListBookingsResult, error) {
 	if err := validator.ValidateListBookingsQuery(query.UserID, query.GymID, query.StartTime, query.EndTime); err != nil {
 		return nil, err
 	}
@@ -39,9 +39,9 @@ func (h *ListBookingsHandler) Handle(ctx context.Context, query ListBookingsQuer
 	var err error
 
 	if query.UserID != "" {
-		bookings, err = h.repo.ListByUserID(ctx, query.UserID, query.StartTime, query.EndTime)
+		bookings, err = handler.repo.ListByUserID(ctx, query.UserID, query.StartTime, query.EndTime)
 	} else if query.GymID != "" {
-		bookings, err = h.repo.ListByGymID(ctx, query.GymID, query.StartTime, query.EndTime)
+		bookings, err = handler.repo.ListByGymID(ctx, query.GymID, query.StartTime, query.EndTime)
 	} else {
 		return nil, booking.ErrInvalidInput
 	}

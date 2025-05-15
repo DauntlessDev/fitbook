@@ -26,12 +26,12 @@ func NewGetBookingHandler(repo booking.Repository) *GetBookingHandler {
 	}
 }
 
-func (h *GetBookingHandler) Handle(ctx context.Context, query GetBookingQuery) (*GetBookingResult, error) {
+func (handler *GetBookingHandler) Handle(ctx context.Context, query GetBookingQuery) (*GetBookingResult, error) {
 	if err := validator.ValidateBookingID(query.BookingID); err != nil {
 		return nil, err
 	}
 
-	bookingRecord, err := h.repo.GetByID(ctx, query.BookingID)
+	bookingRecord, err := handler.repo.GetByID(ctx, query.BookingID)
 	if err != nil {
 		return nil, err
 	}
