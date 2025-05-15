@@ -17,7 +17,7 @@ The service follows Clean Architecture principles and implements Domain-Driven D
 
 ### Prerequisites
 
-- Go 1.21 or later
+- Go 1.22.1 or later
 - Docker and Docker Compose
 - PostgreSQL 15
 - Redis 7
