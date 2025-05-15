@@ -39,35 +39,35 @@ func NewBooking(userID, gymID string, startTime, endTime time.Time) (*Booking, e
 	return booking, nil
 }
 
-func (b *Booking) Cancel() error {
-	if b.Status == StatusCancelled {
+func (booking *Booking) Cancel() error {
+	if booking.Status == StatusCancelled {
 		return ErrBookingAlreadyCancelled
 	}
-	b.Status = StatusCancelled
-	b.UpdatedAt = time.Now()
+	booking.Status = StatusCancelled
+	booking.UpdatedAt = time.Now()
 	return nil
 }
 
-func (b *Booking) Confirm() error {
-	if b.Status != StatusPending {
+func (booking *Booking) Confirm() error {
+	if booking.Status != StatusPending {
 		return ErrInvalidStatusTransition
 	}
-	b.Status = StatusConfirmed
-	b.UpdatedAt = time.Now()
+	booking.Status = StatusConfirmed
+	booking.UpdatedAt = time.Now()
 	return nil
 }
 
-func (b *Booking) Complete() error {
-	if b.Status != StatusConfirmed {
+func (booking *Booking) Complete() error {
+	if booking.Status != StatusConfirmed {
 		return ErrInvalidStatusTransition
 	}
-	b.Status = StatusCompleted
-	b.UpdatedAt = time.Now()
+	booking.Status = StatusCompleted
+	booking.UpdatedAt = time.Now()
 	return nil
 }
 
-func (b *Booking) OverlapsWith(other *Booking) bool {
-	return b.GymID == other.GymID &&
-		b.StartTime.Before(other.EndTime) &&
-		b.EndTime.After(other.StartTime)
+func (booking *Booking) OverlapsWith(other *Booking) bool {
+	return booking.GymID == other.GymID &&
+		booking.StartTime.Before(other.EndTime) &&
+		booking.EndTime.After(other.StartTime)
 }

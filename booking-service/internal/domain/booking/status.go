@@ -9,8 +9,8 @@ const (
 	StatusCompleted BookingStatus = "COMPLETED"
 )
 
-func (s BookingStatus) IsValid() bool {
-	switch s {
+func (status BookingStatus) IsValid() bool {
+	switch status {
 	case StatusPending, StatusConfirmed, StatusCancelled, StatusCompleted:
 		return true
 	default:
@@ -18,6 +18,6 @@ func (s BookingStatus) IsValid() bool {
 	}
 }
 
-func (s BookingStatus) String() string {
-	return string(s)
+func (status BookingStatus) String() string {
+	return string(status)
 }

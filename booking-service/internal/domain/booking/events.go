@@ -21,15 +21,15 @@ type BaseBookingEvent struct {
 	OccurredAtTime time.Time
 }
 
-func (e BaseBookingEvent) OccurredAt() time.Time {
-	return e.OccurredAtTime
+func (event BaseBookingEvent) OccurredAt() time.Time {
+	return event.OccurredAtTime
 }
 
 type BookingCreatedEvent struct {
 	BaseBookingEvent
 }
 
-func (e BookingCreatedEvent) EventName() string {
+func (event BookingCreatedEvent) EventName() string {
 	return "booking.created"
 }
 
@@ -37,7 +37,7 @@ type BookingCancelledEvent struct {
 	BaseBookingEvent
 }
 
-func (e BookingCancelledEvent) EventName() string {
+func (event BookingCancelledEvent) EventName() string {
 	return "booking.cancelled"
 }
 
@@ -45,7 +45,7 @@ type BookingConfirmedEvent struct {
 	BaseBookingEvent
 }
 
-func (e BookingConfirmedEvent) EventName() string {
+func (event BookingConfirmedEvent) EventName() string {
 	return "booking.confirmed"
 }
 
@@ -53,7 +53,7 @@ type BookingCompletedEvent struct {
 	BaseBookingEvent
 }
 
-func (e BookingCompletedEvent) EventName() string {
+func (event BookingCompletedEvent) EventName() string {
 	return "booking.completed"
 }
 
