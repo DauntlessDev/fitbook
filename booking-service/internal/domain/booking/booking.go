@@ -43,6 +43,9 @@ func (booking *Booking) Cancel() error {
 	if booking.Status == StatusCancelled {
 		return ErrBookingAlreadyCancelled
 	}
+	if booking.Status == StatusCompleted {
+		return ErrInvalidStatusTransition
+	}
 	booking.Status = StatusCancelled
 	booking.UpdatedAt = time.Now()
 	return nil
